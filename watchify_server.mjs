@@ -19,7 +19,6 @@ app.get('/status', (req, res) => {
 });
 
 // ✅ Torrent search endpoint (using an external API)
-// You can replace with your preferred torrent API or scraping
 app.get('/search', async (req, res) => {
     const query = req.query.query;
     const page = parseInt(req.query.page) || 1;
@@ -28,7 +27,6 @@ app.get('/search', async (req, res) => {
     if (!query) return res.status(400).json({ error: 'Query is required' });
 
     try {
-        // Example using apibay or any other open API
         const response = await axios.get(`https://apibay.org/q.php?q=${encodeURIComponent(query)}&cat=0`);
         const allTorrents = response.data
             .filter(item => item.name)
@@ -78,8 +76,6 @@ app.get('/stream', async (req, res) => {
     if (!torrent.ready) {
         await new Promise((resolve) => torrent.once('ready', resolve));
     }
-
-    // Refresh keep-alive timer
     keepTorrentAlive(torrent);
 
     const file = torrent.files.find(file =>
