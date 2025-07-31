@@ -1,4 +1,3 @@
-// watchify_server.mjs
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
@@ -13,12 +12,10 @@ const TORRENT_TTL = 10 * 60 * 1000; // 10 minutes
 
 app.use(cors());
 
-// ✅ Health check
 app.get('/status', (req, res) => {
     res.json({ status: 'Watchify server running ✅' });
 });
 
-// ✅ Torrent search endpoint (using an external API)
 app.get('/search', async (req, res) => {
     const query = req.query.query;
     const page = parseInt(req.query.page) || 1;
@@ -122,7 +119,6 @@ app.get('/stream', async (req, res) => {
         });
 
     } else {
-        // No range header — stream entire file
         console.log(`No Range header — streaming full video: ${file.name}`);
 
         res.writeHead(200, {
@@ -155,25 +151,20 @@ app.get('/stream', async (req, res) => {
 
 
 function keepTorrentAlive(torrent) {
-    // Clear existing timeout if any
     const existing = activeTorrents.get(torrent.infoHash);
     if (existing && existing.timeout) {
         clearTimeout(existing.timeout);
     }
 
-    // Set new timeout
     const timeout = setTimeout(() => {
         console.log(`Destroying cached torrent: ${torrent.infoHash}`);
         if (!torrent.destroyed) torrent.destroy();
         activeTorrents.delete(torrent.infoHash);
     }, TORRENT_TTL);
-
-    // Store/refresh entry
+    
     activeTorrents.set(torrent.infoHash, { torrent, timeout });
 }
 
-
-// ✅ Start server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Watchify server running at http://0.0.0.0:${PORT}`);
 });
